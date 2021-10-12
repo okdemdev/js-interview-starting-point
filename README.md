@@ -4,6 +4,8 @@ This repo will serve as a starting point for your code challenge. Feel free to c
 
 In the end it should be proven that the project works by providing test cases and actually running it.
 
+Challenge description: https://github.com/agilefreaks/test_oop
+
 ## Steps
 
 - Fork this repo
