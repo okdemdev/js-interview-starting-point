@@ -2,7 +2,7 @@
 
 ## Steps
 
-- For this repo
+- Fork this repo
 - Clone your fork
 - Finish the exercise
 - Push your best work
