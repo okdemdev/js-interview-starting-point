@@ -1,7 +1,7 @@
 /**
  * @param {Object} position
- * @param {Number} position.latitude
- * @param {Number} position.longitude
+ * @param {Number} position.x
+ * @param {Number} position.y
  * 
  * @returns {Array<position>}
  */

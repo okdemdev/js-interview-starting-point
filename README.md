@@ -1,10 +1,6 @@
 # Javascript Interview Starting Point
 
-This repo will serve as a starting point for your code challenge. Feel free to change anything in order to complete it.
-
-In the end it should be proven that the project works by providing test cases and actually running it.
-
-Challenge description: https://github.com/agilefreaks/test_oop
+This repo will serve as a starting point for your code challenge. Feel free to change anything in order to complete it: Add modules, other tests, new packages etc.
 
 ## Steps
 
@@ -16,7 +12,8 @@ Challenge description: https://github.com/agilefreaks/test_oop
 ## Commands
 
 ```
-yarn run start  # Watch the main script
+yarn run start  # Run the main script
+         dev    # Start development mode 
          test   # Test the code
 ````
 ## Tools
