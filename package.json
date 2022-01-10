@@ -12,14 +12,15 @@
     "dev": "nodemon ./src/index.js",
     "test": "jest"
   },
-  "author": "",
+  "author": "Agile Freaks",
+  "email": "office@agilefreaks.com",
   "license": "MIT",
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.15.8",
-    "@babel/preset-env": "^7.15.8",
-    "babel-jest": "^27.1.0",
-    "jest": "^27.1.0",
-    "nodemon": "^2.0.13"
-  },
-  "dependencies": {}
+    "@babel/core": "7.16.7",
+    "@babel/plugin-transform-runtime": "7.16.7",
+    "@babel/preset-env": "7.16.7",
+    "babel-jest": "27.4.6",
+    "jest": "27.4.6",
+    "nodemon": "2.0.15"
+  }
 }
