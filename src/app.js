@@ -24,7 +24,7 @@ async function getToken() {
   }
 }
 
-async function fetchShops(url, token, retryCount = 1) {
+async function fetchShops(url, token, retryCount = 1, shouldRetryToken = true) {
   console.log('Fetching nearby coffee shops...');
 
   try {
@@ -33,13 +33,20 @@ async function fetchShops(url, token, retryCount = 1) {
     });
 
     if (!response.ok) {
-      // Only retry for 503 errors
+      if (response.status === 401 && shouldRetryToken) {
+        console.log('Token is invalid or expired. Generating new token in 5 seconds...');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        const newToken = await getToken();
+        console.log('New token has been generated, retrying request...');
+        return fetchShops(url, newToken, retryCount, false);
+      }
+
       if (response.status === 503 && retryCount > 0) {
         console.log('Service unavailable. Retrying in 5 seconds...');
         await new Promise((resolve) => setTimeout(resolve, 5000));
-        return fetchShops(url, token, retryCount - 1);
+        return fetchShops(url, token, retryCount - 1, shouldRetryToken);
       }
-      // For other errors, including 401, handle them directly
+
       handleApiError(response.status);
     }
 
@@ -53,7 +60,7 @@ async function fetchShops(url, token, retryCount = 1) {
     if (error.name === 'AbortError' && retryCount > 0) {
       console.log('Request timed out. Retrying in 5 seconds...');
       await new Promise((resolve) => setTimeout(resolve, 5000));
-      return fetchShops(url, token, retryCount - 1);
+      return fetchShops(url, token, retryCount - 1, shouldRetryToken);
     }
     throw error;
   }
