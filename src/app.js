@@ -18,24 +18,39 @@ async function getToken() {
   return token;
 }
 
-async function fetchShops(url, token) {
+async function fetchShops(url, token, retryCount = 1) {
   console.log('Fetching nearby coffee shops...');
 
-  const response = await fetchWithTimeout(`${url}?token=${token}`, {
-    headers: { Accept: 'application/json' },
-  });
+  try {
+    const response = await fetchWithTimeout(`${url}?token=${token}`, {
+      headers: { Accept: 'application/json' },
+    });
 
-  if (!response.ok) {
-    handleApiError(response.status); // This will throw an error with the correct message
+    if (!response.ok) {
+      // Only retry for 503 errors
+      if (response.status === 503 && retryCount > 0) {
+        console.log('Service unavailable. Retrying in 5 seconds...');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        return fetchShops(url, token, retryCount - 1);
+      }
+      // For other errors, including 401, handle them directly
+      handleApiError(response.status);
+    }
+
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid response format from API');
+    }
+
+    return data;
+  } catch (error) {
+    if (error.name === 'AbortError' && retryCount > 0) {
+      console.log('Request timed out. Retrying in 5 seconds...');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      return fetchShops(url, token, retryCount - 1);
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  // Ensure data is an array
-  if (!Array.isArray(data)) {
-    throw new Error('Invalid response format from API');
-  }
-
-  return data;
 }
 
 async function fetchWithTimeout(url, options, timeout = 5000) {
