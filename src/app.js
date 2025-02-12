@@ -2,20 +2,26 @@ async function getToken() {
   const API_URL = 'https://api-challenge.agilefreaks.com/v1/tokens';
   console.log('Fetching authorization token...');
 
-  const response = await fetchWithTimeout(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-  });
+  try {
+    const response = await fetchWithTimeout(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Token request failed with status ${response.status}`);
+    if (!response.ok) {
+      console.log('Token request failed. Please try again.');
+      process.exit(0);
+    }
+
+    const { token } = await response.json();
+    return token;
+  } catch (error) {
+    console.log('Failed to connect to authentication service. Please try again.');
+    process.exit(0);
   }
-
-  const { token } = await response.json();
-  return token;
 }
 
 async function fetchShops(url, token, retryCount = 1) {
@@ -66,7 +72,7 @@ async function fetchWithTimeout(url, options, timeout = 5000) {
 
 function handleApiError(status) {
   const errorMessages = {
-    401: 'Authentication failed. Please try again with a new token.',
+    401: 'Token is invalid or expired. Please try with a different token.',
     406: 'Invalid request format. Please check the Accept header.',
     503: 'Service unavailable. Please try again later.',
     504: 'Request timed out. Please try again.',
@@ -109,7 +115,15 @@ export async function getNearestShops(position) {
   console.log('\nStarting search...');
 
   try {
-    const token = await getToken();
+    let token;
+    try {
+      token = await getToken();
+    } catch (error) {
+      console.log('Failed to get token. Trying one more time...');
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      token = await getToken(); // Second attempt
+    }
+
     const shops = await fetchShops(API_URL, token);
 
     console.log('Calculating distances...');
@@ -128,7 +142,11 @@ export async function getNearestShops(position) {
 
     return nearestShops;
   } catch (error) {
-    console.error('\nError:', error.message);
-    throw error; // Re-throw the error to be caught by the test
+    if (error.message.includes('Token is invalid')) {
+      console.log('Token is invalid or expired. Please try with a different token.');
+      process.exit(0);
+    }
+    console.log(error.message);
+    process.exit(0);
   }
 }
