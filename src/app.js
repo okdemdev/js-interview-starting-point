@@ -26,10 +26,16 @@ async function fetchShops(url, token) {
   });
 
   if (!response.ok) {
-    handleApiError(response.status);
+    handleApiError(response.status); // This will throw an error with the correct message
   }
 
-  return response.json();
+  const data = await response.json();
+  // Ensure data is an array
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid response format from API');
+  }
+
+  return data;
 }
 
 async function fetchWithTimeout(url, options, timeout = 5000) {
@@ -80,6 +86,11 @@ export async function getNearestShops(position) {
     position = { x, y };
   }
 
+  if (isNaN(position.x) || isNaN(position.y)) {
+    console.error('Please provide valid x and y coordinates');
+    return [];
+  }
+
   console.log('\nStarting search...');
 
   try {
@@ -103,6 +114,6 @@ export async function getNearestShops(position) {
     return nearestShops;
   } catch (error) {
     console.error('\nError:', error.message);
-    return [];
+    throw error; // Re-throw the error to be caught by the test
   }
 }
